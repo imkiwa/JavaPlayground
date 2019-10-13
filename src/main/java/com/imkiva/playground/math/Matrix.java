@@ -1,6 +1,7 @@
 package com.imkiva.playground.math;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
 /**
@@ -12,6 +13,9 @@ public class Matrix {
     private int column;
 
     private double[][] data;
+
+    public static Matrix ZERO = Matrix.zero(0);
+    public static Matrix UNIT = Matrix.zero(0);
 
     public static Matrix zero(Matrix target) {
         if (target == null) {
@@ -59,7 +63,20 @@ public class Matrix {
         return column;
     }
 
+    public void set(int row, int column, double element) {
+        data[row][column] = element;
+    }
+
+    public double get(int row, int column) {
+        return data[row][column];
+    }
+
+    // Calculation
     public Matrix add(Matrix other) {
+        if (other == ZERO) {
+            return this.slowCopy();
+        }
+
         if (!allowLinearCalculationWith(other)) {
             throw new IllegalArgumentException();
         }
@@ -68,6 +85,10 @@ public class Matrix {
     }
 
     public Matrix subtract(Matrix other) {
+        if (other == ZERO) {
+            return this.slowCopy();
+        }
+
         if (!allowLinearCalculationWith(other)) {
             throw new IllegalArgumentException();
         }
@@ -84,6 +105,18 @@ public class Matrix {
     }
 
     public Matrix multiply(Matrix other) {
+        if (this == UNIT) {
+            return other.slowCopy();
+        }
+
+        if (other == UNIT) {
+            return this.slowCopy();
+        }
+
+        if (other == ZERO) {
+            return zero(this);
+        }
+
         if (!allowMultiplyWith(other)) {
             throw new IllegalArgumentException();
         }
@@ -97,6 +130,8 @@ public class Matrix {
         }
         return matrix;
     }
+
+    ////////////////////////////////////////////////////////////////////////////////
 
     private double matrixMultiply(Matrix lhs, Matrix rhs, int i, int j, int p) {
         double sum = 0;
@@ -116,29 +151,31 @@ public class Matrix {
         return matrix;
     }
 
-    public void set(int row, int column, double element) {
-        data[row][column] = element;
+    private Matrix slowCopy() {
+        Matrix matrix = new Matrix(getRow(), getColumn());
+        for (int i = 0; i < getRow(); i++) {
+            for (int j = 0; j < getColumn(); j++) {
+                matrix.set(i, j, get(i, j));
+            }
+        }
+        return matrix;
     }
 
-    public double get(int row, int column) {
-        return data[row][column];
-    }
-
-    public boolean allowLinearCalculationWith(Matrix other) {
+    private boolean allowLinearCalculationWith(Matrix other) {
         if (other == null) {
             throw new NullPointerException();
         }
         return getRow() == other.getRow() && getColumn() == other.getColumn();
     }
 
-    public boolean allowMultiplyWith(Matrix other) {
+    private boolean allowMultiplyWith(Matrix other) {
         if (other == null) {
             throw new NullPointerException();
         }
         return getColumn() == other.getRow();
     }
 
-    public void setZero(int row, int column) {
+    private void setZero(int row, int column) {
         if (data == null || getRow() != row || getColumn() != column) {
             data = new double[row][column];
             return;
@@ -159,5 +196,22 @@ public class Matrix {
             builder.append("]\n");
         }
         return builder.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Matrix matrix = (Matrix) o;
+        return getRow() == matrix.getRow() &&
+                getColumn() == matrix.getColumn() &&
+                Arrays.equals(data, matrix.data);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getRow(), getColumn());
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 }
