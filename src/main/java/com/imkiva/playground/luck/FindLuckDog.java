@@ -37,10 +37,11 @@ public class FindLuckDog {
 
     private int rollNumber(int size) {
         var random = new Random();
-        int loopTimes = random.nextInt(size);
+        int randTimes = random.nextInt(size);
+        int loopTimes = 2 * randTimes + random.nextInt(size);
 
         // Discard some results according to candidate count
-        for (int i = 0; i < 3 * loopTimes; i++) {
+        for (int i = 0; i < loopTimes; i++) {
             random.nextInt(size);
         }
         return random.nextInt(size);
