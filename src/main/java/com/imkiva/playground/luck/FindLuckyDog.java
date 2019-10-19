@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
  * @author kiva
  * @date 2019/10/19
  */
-public class FindLuckDog {
+public class FindLuckyDog {
     private static final String LUCKY_URL = "http://bbs.covariant.cn/d/11";
 
     public static void main(String[] args) {
-        new FindLuckDog().find();
+        new FindLuckyDog().find();
     }
 
     private void find() {
