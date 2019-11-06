@@ -1,4 +1,4 @@
-package com.imkiva.playground.toys;
+package com.imkiva.playground.math;
 
 import java.util.Random;
 
@@ -6,7 +6,7 @@ import java.util.Random;
  * @author kiva
  * @date 2019-05-01
  */
-public class Box {
+public class BoxProblem {
     enum Color {
         RED, BLUE
     }
