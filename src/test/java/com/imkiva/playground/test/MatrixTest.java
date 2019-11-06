@@ -1,10 +1,12 @@
-package com.imkiva.playground.math;
+package com.imkiva.playground.test;
+
+import com.imkiva.playground.math.Matrix;
 
 /**
  * @author kiva
  * @date 2019-09-09
  */
-public class Main {
+public class MatrixTest {
     public static void main(String[] args) throws InterruptedException {
         Matrix lhs = new Matrix(new double[][]{
                 {3, 4, 1, 0},
