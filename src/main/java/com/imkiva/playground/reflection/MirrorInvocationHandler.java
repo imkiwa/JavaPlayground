@@ -1,6 +1,6 @@
 package com.imkiva.playground.reflection;
 
-import com.imkiva.playground.reflection.core.Reflector;
+import com.imkiva.playground.reflection.core.Reflect;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -10,16 +10,16 @@ import java.lang.reflect.Method;
  */
 public class MirrorInvocationHandler<T> implements InvocationHandler {
     private Class<T> targetClass;
-    private Reflector reflector;
+    private Reflect reflect;
 
     public MirrorInvocationHandler(Class<T> mirrorClass) {
         this.targetClass = mirrorClass;
-        Mirrored mirrorClassTag = targetClass.getAnnotation(Mirrored.class);
+        Mirror mirrorClassTag = targetClass.getAnnotation(Mirror.class);
         if (mirrorClassTag == null) {
             throw new IllegalArgumentException(mirrorClass.getName()
                     + " is not a mirror");
         }
-        this.reflector = Reflector.of(mirrorClassTag.value());
+        this.reflect = Reflect.of(mirrorClassTag.value());
     }
 
     @Override
@@ -27,7 +27,7 @@ public class MirrorInvocationHandler<T> implements InvocationHandler {
         System.out.println(method.getName());
         Constructor constructorTag = method.getAnnotation(Constructor.class);
         if (constructorTag != null) {
-            this.reflector = reflector.instance(args);
+            this.reflect = reflect.instance(args);
         } else {
             throw new UnsupportedOperationException(targetClass.getName()
                     + "." + method.getName());

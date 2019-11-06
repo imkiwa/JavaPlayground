@@ -9,7 +9,7 @@ import java.lang.reflect.Proxy;
  * @author kiva
  */
 
-public class Reflector {
+public class Reflect {
     enum TargetType {
         /**
          * We are operating an {@link Object}, except {@link Class}
@@ -32,12 +32,12 @@ public class Reflector {
      */
     private Object target;
 
-    private Reflector(Object target) {
+    private Reflect(Object target) {
         this.target = target;
         this.targetType = TargetType.OBJECT;
     }
 
-    private Reflector(Class clazz) {
+    private Reflect(Class clazz) {
         this.target = clazz;
         this.targetType = TargetType.CLASS;
     }
@@ -49,8 +49,8 @@ public class Reflector {
      * @param object The object to be wrapped
      * @return Reflector
      */
-    public static Reflector of(Object object) {
-        return new Reflector(object);
+    public static Reflect of(Object object) {
+        return new Reflect(object);
     }
 
     /**
@@ -60,8 +60,8 @@ public class Reflector {
      * @param clazz Given class type
      * @return Reflector
      */
-    public static Reflector of(Class<?> clazz) {
-        return new Reflector(clazz);
+    public static Reflect of(Class<?> clazz) {
+        return new Reflect(clazz);
     }
 
     /**
@@ -72,8 +72,8 @@ public class Reflector {
      * @throws ReflectionException If any error occurs
      * @see #of(Class)
      */
-    public static Reflector of(String className) {
-        return of(className, Reflector.class.getClassLoader());
+    public static Reflect of(String className) {
+        return of(className, Reflect.class.getClassLoader());
     }
 
     /**
@@ -85,7 +85,7 @@ public class Reflector {
      * @throws ReflectionException If any error occurs
      * @see #of(Class)
      */
-    public static Reflector of(String className, ClassLoader classLoader) {
+    public static Reflect of(String className, ClassLoader classLoader) {
         return of(ReflectionHelper.forName(className, classLoader));
     }
 
@@ -95,7 +95,7 @@ public class Reflector {
      * @return Reflector to the return value of the method
      * @throws ReflectionException If any error occurs
      */
-    public Reflector instance() throws ReflectionException {
+    public Reflect instance() throws ReflectionException {
         return instance(new Object[0]);
     }
 
@@ -106,7 +106,7 @@ public class Reflector {
      * @return Reflector to the return value of the method
      * @throws ReflectionException If any error occurs
      */
-    public Reflector instance(Object... args) throws ReflectionException {
+    public Reflect instance(Object... args) throws ReflectionException {
         Class<?> targetClass = getTargetClass();
         Class<?>[] parameterTypes = ReflectionHelper.convertParameterTypes(args);
         try {
@@ -128,7 +128,7 @@ public class Reflector {
      * @return Reflector to the return value of the method
      * @throws ReflectionException If any error occurs
      */
-    public Reflector call(String methodName) throws ReflectionException {
+    public Reflect call(String methodName) throws ReflectionException {
         return call(methodName, new Object[0]);
     }
 
@@ -140,7 +140,7 @@ public class Reflector {
      * @return Reflector to the return value of the method
      * @throws ReflectionException If any error occurs
      */
-    public Reflector call(String methodName, Object... args) throws ReflectionException {
+    public Reflect call(String methodName, Object... args) throws ReflectionException {
         Class<?> targetClass = getTargetClass();
         Class<?>[] parameterTypes = ReflectionHelper.convertParameterTypes(args);
 
@@ -172,12 +172,12 @@ public class Reflector {
      * @return Reflector
      * @throws ReflectionException If any error occurs
      */
-    public Reflector set(String fieldName, Object value) throws ReflectionException {
+    public Reflect set(String fieldName, Object value) throws ReflectionException {
         Field field = lookupField(fieldName);
         try {
             Object realValue = value;
-            if (value instanceof Reflector) {
-                realValue = ((Reflector) value).get();
+            if (value instanceof Reflect) {
+                realValue = ((Reflect) value).get();
             }
 
             field.set(target, realValue);
@@ -206,7 +206,7 @@ public class Reflector {
      * @return {@link Field}
      * @throws ReflectionException If any error occurs
      */
-    public Reflector field(String fieldName) throws ReflectionException {
+    public Reflect field(String fieldName) throws ReflectionException {
         try {
             return of(lookupField(fieldName).get(target));
 
@@ -272,7 +272,7 @@ public class Reflector {
      */
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Reflector && target.equals(((Reflector) obj).get());
+        return obj instanceof Reflect && target.equals(((Reflect) obj).get());
     }
 
     /**

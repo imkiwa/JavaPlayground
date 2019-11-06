@@ -33,7 +33,7 @@ public class FakeInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String name = method.getName();
         try {
-            return Reflector.of(target).call(name, args).get();
+            return Reflect.of(target).call(name, args).get();
 
         } catch (ReflectionException e) {
             if (isMap) {

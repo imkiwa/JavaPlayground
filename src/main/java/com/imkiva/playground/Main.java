@@ -1,6 +1,6 @@
 package com.imkiva.playground;
 
-import com.imkiva.playground.reflection.core.Reflector;
+import com.imkiva.playground.reflection.core.Reflect;
 
 /**
  * @author kiva
@@ -20,7 +20,7 @@ public class Main {
 
     public static void main(String[] args) throws Throwable {
         var x = make(10);
-        int a = Reflector.of(x).call("add", 1).get();
+        int a = Reflect.of(x).call("add", 1).get();
         System.out.println(a);
     }
 }
