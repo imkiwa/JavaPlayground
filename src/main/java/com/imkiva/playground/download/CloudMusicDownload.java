@@ -38,7 +38,7 @@ public class CloudMusicDownload {
     private int getMusicID(String musicName) throws Exception {
         String url = String.format(Locale.getDefault(),
                 "http://localhost:3000/search?type=1&keywords=%s",
-                URLEncoder.encode(musicName, "utf-8"));
+                URLEncoder.encode(musicName, StandardCharsets.UTF_8));
 
         JsonObject jsonObject = new JsonParser().parse(httpGet(url)).getAsJsonObject();
         JsonArray resultArray = jsonObject.getAsJsonObject("result").getAsJsonArray("songs");
