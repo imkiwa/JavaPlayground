@@ -66,7 +66,7 @@ public class LiveStatus {
                 case 2:
                     return Status.LOOPING;
             }
-        } catch (Exception ignored) {
+        } catch (Throwable ignored) {
         }
 
         return Status.UNKNOWN;
