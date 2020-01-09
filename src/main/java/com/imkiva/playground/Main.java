@@ -1,26 +1,80 @@
 package com.imkiva.playground;
 
-import com.imkiva.playground.reflection.core.Reflect;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author kiva
  * @date 2019-10-09
  */
 public class Main {
-    private void fuck() {
+    public static <A, B> Function<A, B> y(Function<Function<A, B>, Function<A, B>> ff) {
+        return ff.apply(t -> y(ff).apply(t));
     }
 
-    private static Object make(int base) {
-        return new Object() {
-            public int add(int x) {
-                return x + base;
+    public static <T> Consumer<T> yCon(Function<Consumer<T>, Consumer<T>> ff) {
+        return ff.apply(t -> yCon(ff).accept(t));
+    }
+
+    /**
+     * A possible implementation of Task
+     */
+    static class Task implements Runnable {
+        boolean canceled = false;
+
+        void cancel() {
+            System.out.println("Task canceled");
+            canceled = true;
+        }
+
+        public boolean isCanceled() {
+            return canceled;
+        }
+
+        @Override
+        public void run() {
+        }
+    }
+
+    /**
+     * A possible implementation of runTask()
+     * @param task
+     * @param duration
+     */
+    private static void runTask(Consumer<Task> task, int duration) {
+        Task t = new Task();
+        while (!t.isCanceled()) {
+            task.accept(t);
+
+            try {
+                Thread.sleep(duration);
+            } catch (InterruptedException ignored) {
             }
-        };
+        }
     }
 
-    public static void main(String[] args) throws Throwable {
-        var x = make(10);
-        int a = Reflect.of(x).call("add", 1).get();
-        System.out.println(a);
+    public static void main(String[] args) {
+        runTask((task -> {
+            Random random = new Random();
+
+            // simulate real-world situation
+            if (random.nextInt(100) > 30) {
+                System.out.println("Task continue");
+            } else {
+                task.cancel();
+            }
+        }), 1000);
+
+        runTask(yCon(unused -> task -> {
+            Random random = new Random();
+
+            // simulate real-world situation
+            if (random.nextInt(100) > 30) {
+                System.out.println("Task continue");
+            } else {
+                task.cancel();
+            }
+        }), 1000);
     }
 }
