@@ -24,7 +24,6 @@ public class Main {
         boolean canceled = false;
 
         void cancel() {
-            System.out.println("Task canceled");
             canceled = true;
         }
 
@@ -73,6 +72,7 @@ public class Main {
             if (random.nextInt(100) > 30) {
                 System.out.println("Task continue");
             } else {
+                System.out.println("Task canceled");
                 task.cancel();
             }
         }), 1000);
