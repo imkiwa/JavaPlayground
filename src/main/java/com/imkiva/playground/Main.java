@@ -66,7 +66,7 @@ public class Main {
             }
         }), 1000);
 
-        runTask(yCon(unused -> task -> {
+        runTask(yCon(taskConsumer -> task -> {
             Random random = new Random();
 
             // simulate real-world situation
