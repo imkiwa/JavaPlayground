@@ -4,15 +4,15 @@ package com.imkiva.playground.parser;
  * program := expr;
  * <p>
  * expr := literalExpr
- * | ifExpr
- * | applyExpr
- * | '(' expr ')'
- * ;
+ *       | ifExpr
+ *       | applyExpr
+ *       | '(' expr ')'
+ *       ;
  * <p>
  * literalExpr := "true"
- * | "false"
- * | [0-9]+
- * ;
+ *              | "false"
+ *              | [0-9]+
+ *              ;
  * <p>
  * ifExpr := 'if' '(' expr ')' expr 'else' expr ;
  * <p>
@@ -25,7 +25,7 @@ package com.imkiva.playground.parser;
  */
 public class ArithParser {
     public static void main(String[] args) {
-        Parser parser = new Parser("if (true) 1 else 0");
+        Parser parser = new Parser("if (true) id (if (false) 233 else 666) else 0");
         Program program = parser.program();
         System.out.println(program.eval());
     }
