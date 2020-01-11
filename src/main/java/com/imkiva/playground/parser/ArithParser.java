@@ -1,6 +1,8 @@
 package com.imkiva.playground.parser;
 
 /**
+ * The simple Arith Language syntax are as follows:
+ *
  * program := expr;
  * <p>
  * expr := literalExpr
