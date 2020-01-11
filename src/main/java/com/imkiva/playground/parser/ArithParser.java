@@ -377,10 +377,10 @@ public class ArithParser {
 
     static class Optimizer {
         public static Program optimize(Program program) {
-            return new Program(optimizeExpr(program.expr));
+            return new Program(foldExpr(program.expr));
         }
 
-        public static Expr optimizeExpr(Expr expr) {
+        public static Expr foldExpr(Expr expr) {
             if (expr.getClass() != IfExpr.class) {
                 return expr;
             }
@@ -397,9 +397,9 @@ public class ArithParser {
 
             boolean condValue = cond.token.tokenText.equals("true");
             if (condValue) {
-                return optimizeExpr(ifExpr.trueExpr);
+                return foldExpr(ifExpr.trueExpr);
             } else {
-                return optimizeExpr(ifExpr.falseExpr);
+                return foldExpr(ifExpr.falseExpr);
             }
         }
     }
