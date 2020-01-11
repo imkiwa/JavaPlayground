@@ -16,7 +16,7 @@ package com.imkiva.playground.parser;
  *              | [0-9]+
  *              ;
  * <p>
- * ifExpr := 'if' expr expr 'else' expr ;
+ * ifExpr := 'if' expr 'then' expr 'else' expr ;
  * <p>
  * applyExpr := ID expr ;
  * <p>
@@ -27,7 +27,16 @@ package com.imkiva.playground.parser;
  */
 public class ArithParser {
     public static void main(String[] args) {
-        Parser parser = new Parser("if true (id if false 233 else 666) else 0");
+        run("1");
+        run("false");
+        run("if true then (id if false then 233 else 666) else 0");
+        run("if false then 0 " +
+                "else if true then 1 " +
+                "else 2");
+    }
+
+    private static void run(String src) {
+        Parser parser = new Parser(src);
         Program program = parser.program();
         System.out.println(program.eval());
     }
@@ -35,6 +44,7 @@ public class ArithParser {
     static class Token {
         enum Type {
             KEYWORD_IF,     // 'if'
+            KEYWORD_THEN,   // 'then'
             KEYWORD_ELSE,   // 'else'
             LITERAL_BOOL,   // 'true', 'false'
             LITERAL_INT,    // '[0-9]+'
@@ -120,6 +130,8 @@ public class ArithParser {
                         return new Token(Token.Type.KEYWORD_IF, tokenText);
                     case "else":
                         return new Token(Token.Type.KEYWORD_ELSE, tokenText);
+                    case "then":
+                        return new Token(Token.Type.KEYWORD_THEN, tokenText);
                     default:
                         return new Token(Token.Type.ID, tokenText);
                 }
@@ -158,8 +170,19 @@ public class ArithParser {
 
             int c = src[position];
 
+            // skip linebreaks
+            while (c == '\n' || c == '\r') {
+                if (position == src.length - 1) {
+                    return EOF;
+                }
+                c = src[++position];
+            }
+
             // skip whitespaces if required
             while (skipWs && Character.isSpaceChar(c)) {
+                if (position == src.length - 1) {
+                    return EOF;
+                }
                 c = src[++position];
             }
             return c;
@@ -307,6 +330,12 @@ public class ArithParser {
 
         private IfExpr ifExpr() {
             Expr condition = expr();
+
+            Token thenToken = nextToken();
+            if (thenToken.tokenType != Token.Type.KEYWORD_THEN) {
+                throw new ParseException("Unexpected token "
+                        + thenToken.tokenText + ", expected 'then'");
+            }
 
             Expr trueExpr = expr();
 
