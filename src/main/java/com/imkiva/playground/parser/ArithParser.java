@@ -39,7 +39,16 @@ public class ArithParser {
         Parser parser = new Parser(src);
         Program program = parser.program();
         Program optimized = Optimizer.optimize(program);
-        System.out.println(optimized.eval());
+
+        System.out.println("======== Parsing code [" + src + "]");
+        System.out.println(":: Directly evaluated: " + optimized.eval());
+        System.out.println();
+        System.out.println(":: Generate code for unoptimized code: ");
+        System.out.println(CodeGenerator.genHaskell(program));
+        System.out.println();
+        System.out.println(":: Generate code for optimized code: ");
+        System.out.println(CodeGenerator.genHaskell(optimized));
+        System.out.println("\n");
     }
 
     static class Token {
@@ -275,17 +284,17 @@ public class ArithParser {
 
     static class ApplyExpr extends Expr {
         public Token idToken;
-        public Expr expr;
+        public Expr argument;
 
-        public ApplyExpr(Token idToken, Expr expr) {
+        public ApplyExpr(Token idToken, Expr argument) {
             this.idToken = idToken;
-            this.expr = expr;
+            this.argument = argument;
         }
 
         @Override
         public Object eval() {
             if (idToken.tokenText.equals("id")) {
-                return expr.eval();
+                return argument.eval();
             }
 
             // TODO: support more functions
@@ -381,26 +390,89 @@ public class ArithParser {
         }
 
         public static Expr foldExpr(Expr expr) {
-            if (expr.getClass() != IfExpr.class) {
+            if (expr.getClass() == IfExpr.class) {
+                return foldIf(((IfExpr) expr));
+            }
+
+            if (expr.getClass() == ApplyExpr.class) {
+                return foldApply(((ApplyExpr) expr));
+            }
+
+            return expr;
+        }
+
+        private static Expr foldApply(ApplyExpr expr) {
+            if (expr.idToken.tokenText.equals("id")) {
+                return foldExpr(expr.argument);
+            }
+            return expr;
+        }
+
+        private static Expr foldIf(IfExpr expr) {
+            if (expr.condition.getClass() != LiteralExpr.class) {
                 return expr;
             }
 
-            IfExpr ifExpr = ((IfExpr) expr);
-            if (ifExpr.condition.getClass() != LiteralExpr.class) {
-                return expr;
-            }
-
-            LiteralExpr cond = ((LiteralExpr) ifExpr.condition);
+            LiteralExpr cond = ((LiteralExpr) expr.condition);
             if (cond.token.tokenType != Token.Type.LITERAL_BOOL) {
                 return expr;
             }
 
-            boolean condValue = cond.token.tokenText.equals("true");
-            if (condValue) {
-                return foldExpr(ifExpr.trueExpr);
-            } else {
-                return foldExpr(ifExpr.falseExpr);
+            return cond.token.tokenText.equals("true")
+                    ? foldExpr(expr.trueExpr)
+                    : foldExpr(expr.falseExpr);
+        }
+    }
+
+    static class CodeGenException extends RuntimeException {
+        public CodeGenException(String message) {
+            super(message);
+        }
+    }
+
+    static class CodeGenerator {
+        public static String genHaskell(Program program) {
+            return "main :: IO ()\n"
+                    + "main = putStrLn $ show $ "
+                    + genExpr(program.expr);
+        }
+
+        public static String genExpr(Expr expr) {
+            if (expr.getClass() == IfExpr.class) {
+                return genIfExpr(((IfExpr) expr));
+
+            } else if (expr.getClass() == LiteralExpr.class) {
+                return genLiteralExpr(((LiteralExpr) expr));
+
+            } else if (expr.getClass() == ApplyExpr.class) {
+                return genApplyExpr(((ApplyExpr) expr));
             }
+
+            throw new CodeGenException("should never reach here");
+        }
+
+        private static String genApplyExpr(ApplyExpr expr) {
+            return String.format("(%s (%s))", expr.idToken.tokenText,
+                    genExpr(expr.argument));
+        }
+
+        private static String genLiteralExpr(LiteralExpr expr) {
+            if (expr.token.tokenType == Token.Type.LITERAL_BOOL) {
+                switch (expr.token.tokenText) {
+                    case "true":
+                        return "True";
+                    case "false":
+                        return "False";
+                }
+            }
+            return expr.token.tokenText;
+        }
+
+        private static String genIfExpr(IfExpr expr) {
+            return String.format("if (%s) then (%s) else (%s)",
+                    genExpr(expr.condition),
+                    genExpr(expr.trueExpr),
+                    genExpr(expr.falseExpr));
         }
     }
 }
