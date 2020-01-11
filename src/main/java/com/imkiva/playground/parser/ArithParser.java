@@ -16,7 +16,7 @@ package com.imkiva.playground.parser;
  *              | [0-9]+
  *              ;
  * <p>
- * ifExpr := 'if' '(' expr ')' expr 'else' expr ;
+ * ifExpr := 'if' expr expr 'else' expr ;
  * <p>
  * applyExpr := ID expr ;
  * <p>
@@ -27,7 +27,7 @@ package com.imkiva.playground.parser;
  */
 public class ArithParser {
     public static void main(String[] args) {
-        Parser parser = new Parser("if (true) id (if (false) 233 else 666) else 0");
+        Parser parser = new Parser("if true (id if false 233 else 666) else 0");
         Program program = parser.program();
         System.out.println(program.eval());
     }
@@ -306,19 +306,7 @@ public class ArithParser {
         }
 
         private IfExpr ifExpr() {
-            Token lparen = nextToken();
-            if (lparen.tokenType != Token.Type.LPAREN) {
-                throw new ParseException("Unexpected token "
-                        + lparen.tokenText + ", expected '('");
-            }
-
             Expr condition = expr();
-
-            Token rparen = nextToken();
-            if (rparen.tokenType != Token.Type.RPAREN) {
-                throw new ParseException("Unexpected token "
-                        + rparen.tokenText + ", expected ')'");
-            }
 
             Expr trueExpr = expr();
 
