@@ -2,7 +2,7 @@ package com.imkiva.playground.parser;
 
 /**
  * The simple Arith Language syntax are as follows:
- *
+ * <p>
  * program := expr;
  * <p>
  * expr := literalExpr
@@ -38,7 +38,8 @@ public class ArithParser {
     private static void run(String src) {
         Parser parser = new Parser(src);
         Program program = parser.program();
-        System.out.println(program.eval());
+        Program optimized = Optimizer.optimize(program);
+        System.out.println(optimized.eval());
     }
 
     static class Token {
@@ -211,7 +212,8 @@ public class ArithParser {
         }
     }
 
-    static class Node {
+    static abstract class Node {
+        public abstract Object eval();
     }
 
     static class Program extends Node {
@@ -227,7 +229,6 @@ public class ArithParser {
     }
 
     static abstract class Expr extends Node {
-        public abstract Object eval();
     }
 
     static class LiteralExpr extends Expr {
@@ -371,6 +372,35 @@ public class ArithParser {
                 throw new ParseException("Unexpected <EOF>");
             }
             return token;
+        }
+    }
+
+    static class Optimizer {
+        public static Program optimize(Program program) {
+            return new Program(optimizeExpr(program.expr));
+        }
+
+        public static Expr optimizeExpr(Expr expr) {
+            if (expr.getClass() != IfExpr.class) {
+                return expr;
+            }
+
+            IfExpr ifExpr = ((IfExpr) expr);
+            if (ifExpr.condition.getClass() != LiteralExpr.class) {
+                return expr;
+            }
+
+            LiteralExpr cond = ((LiteralExpr) ifExpr.condition);
+            if (cond.token.tokenType != Token.Type.LITERAL_BOOL) {
+                return expr;
+            }
+
+            boolean condValue = cond.token.tokenText.equals("true");
+            if (condValue) {
+                return optimizeExpr(ifExpr.trueExpr);
+            } else {
+                return optimizeExpr(ifExpr.falseExpr);
+            }
         }
     }
 }
