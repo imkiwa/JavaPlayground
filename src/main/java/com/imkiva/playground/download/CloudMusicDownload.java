@@ -121,15 +121,15 @@ public class CloudMusicDownload {
                 String[] array = line.split(" - ", 2);
                 String artist = array[0];
                 String name = array[1];
-                System.out.println("下载歌曲: " + artist + " 的 " + name);
+                System.out.println("Downloading: " + artist + " -> " + name);
                 String url = getMusicURL(artist + " " + name);
                 if (url != null) {
                     downloadMusic(url, artist, name);
-                    System.out.println("成功: " + url);
+                    System.out.println("Success: " + url);
                 }
             } catch (Throwable e) {
                 e.printStackTrace();
-                System.out.println("未找到歌曲");
+                System.out.println("Music not found");
             }
         }
     }
