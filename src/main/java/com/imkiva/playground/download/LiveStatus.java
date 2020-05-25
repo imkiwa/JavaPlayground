@@ -38,8 +38,15 @@ public class LiveStatus {
     private static final String URL_ROOM_INIT =
             "https://api.live.bilibili.com/room/v1/Room/room_init?id=%d";
 
+    private static final String URL_ROOM_INFO =
+            "https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=%d";
+
     private static String roomInitUrl(int roomId) {
         return String.format(URL_ROOM_INIT, roomId);
+    }
+
+    private static String roomInfoUrl(int realId) {
+        return String.format(URL_ROOM_INFO, realId);
     }
 
     private static Status obtainLiveStatus(int roomId) {

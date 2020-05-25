@@ -1,6 +1,14 @@
 package com.imkiva.playground;
 
-import java.util.Random;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+
+import java.net.InetSocketAddress;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -38,6 +46,7 @@ public class Main {
 
     /**
      * A possible implementation of runTask()
+     *
      * @param task
      * @param duration
      */
@@ -53,28 +62,22 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
-        runTask((task -> {
-            Random random = new Random();
+    public static void main(String[] args) throws Exception {
+        var client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .proxy(ProxySelector.of(new InetSocketAddress("localhost", 10809)))
+                .version(HttpClient.Version.HTTP_2)
+                .build();
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create("https://www.youtube.com/watch?v=HbgzrKJvDRw"))
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36")
+                .GET()
+                .build();
 
-            // simulate real-world situation
-            if (random.nextInt(100) > 30) {
-                System.out.println("Task continue");
-            } else {
-                task.cancel();
-            }
-        }), 1000);
+        String htmlContent = client.send(request,
+                HttpResponse.BodyHandlers.ofString()).body();
 
-        runTask(yCon(taskConsumer -> task -> {
-            Random random = new Random();
-
-            // simulate real-world situation
-            if (random.nextInt(100) > 30) {
-                System.out.println("Task continue");
-            } else {
-                System.out.println("Task canceled");
-                task.cancel();
-            }
-        }), 1000);
+        var document = Jsoup.parse(htmlContent);
+        System.out.println(document.body().toString());
     }
 }
